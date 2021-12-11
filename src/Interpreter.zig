@@ -43,7 +43,7 @@ pub fn startLoop(self: *Self) void {
     if (self.src_mem[self.ptr] == 0) {
         // jump to matching ']'
     } else {
-        self.loop_start_idx = self.ptr;
+        self.loop_start_idx = self.src_idx;
     }
 }
 
