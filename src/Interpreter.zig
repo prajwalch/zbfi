@@ -3,7 +3,9 @@ const Self = @This();
 
 const allocator = std.heap.page_allocator;
 const stdin = std.io.getStdIn().reader();
-const stdout = std.io.StdOut.writer();
+const stdout = std.io.getStdOut().writer();
+
+const MEMORY_SIZE = 30_000;
 
 const Loop = struct {
     start_index: usize,
@@ -13,7 +15,7 @@ src: []const u8,
 src_current_index: usize = 0,
 src_next_index: usize = 0,
 
-mem: [30_000]usize = [_]usize{0} ** 30_000,
+mem: [MEMORY_SIZE]u8 = [_]u8{0} ** MEMORY_SIZE,
 mem_index: usize = 0,
 loop_stack: std.ArrayList(Loop) = std.ArrayList(Loop).init(allocator),
 
