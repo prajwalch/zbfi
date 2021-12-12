@@ -78,3 +78,7 @@ pub fn readChar(self: *Self) !void {
     try stdin.skipUntilDelimiterOrEof('\n');
     self.mem[self.mem_index] = char;
 }
+
+pub fn writeChar(self: *Self) !void {
+    try stdout.writeByte(self.mem[self.mem_index]);
+}
