@@ -24,8 +24,8 @@ pub fn deinit(self: Self) void {
 
 pub fn next(self: *Self) ?u8 {
     self.src_current_index = self.src_next_index;
-    self.src_next_index += 1;
     if (self.src_current_index >= self.src.len) return null;
+    self.src_next_index += 1;
     return self.src[self.src_current_index];
 }
 
