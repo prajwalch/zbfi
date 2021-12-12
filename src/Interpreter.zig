@@ -2,6 +2,9 @@ const std = @import("std");
 const Self = @This();
 
 const allocator = std.heap.page_allocator;
+const stdin = std.io.getStdIn().reader();
+const stdout = std.io.StdOut.writer();
+
 const Loop = struct {
     start_index: usize,
 };
@@ -66,4 +69,10 @@ pub fn endLoop(self: *Self) void {
         // jump to matching '[' (start of loop)
         self.src_next_index = last_loop_stack.start_index;
     }
+}
+
+pub fn readChar(self: *Self) !void {
+    var char = try stdin.readByte();
+    try stdin.skipUntilDelimiterOrEof('\n');
+    self.mem[self.mem_index] = char;
 }
