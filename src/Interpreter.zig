@@ -2,61 +2,68 @@ const std = @import("std");
 const Self = @This();
 
 const allocator = std.heap.page_allocator;
+const Loop = struct {
+    start_index: usize,
+};
 
 src: []const u8,
-ptr: usize = 0,
-src_idx: usize = 0,
-src_mem: [30_000]usize = [_]usize{0} ** 30_000,
-/// when ptr will be at ']' then -1 indicates
-/// that there is no any looo start operator
-loop_start_idx: usize = 0,
+src_current_index: usize = 0,
+src_next_index: usize = 0,
+
+mem: [30_000]usize = [_]usize{0} ** 30_000,
+mem_index: usize = 0,
+loop_stack: std.ArrayList(Loop) = std.ArrayList(Loop).init(allocator),
 
 pub fn init(src: []const u8) Self {
     return Self{ .src = src };
 }
 
+pub fn deinit(self: Self) void {
+    self.loop_stack.deinit();
+}
+
 pub fn next(self: *Self) ?u8 {
-    if (self.src_idx >= self.src.len) return null;
-    const ch = self.src[self.src_idx];
-    self.src_idx += 1;
-    return ch;
+    self.src_current_index = self.src_next_index;
+    self.src_next_index += 1;
+    if (self.src_current_index >= self.src.len) return null;
+    return self.src[self.src_current_index];
 }
 
 pub fn increasePtr(self: *Self) void {
-    if (self.ptr < self.src_mem.len) self.ptr += 1;
+    if (self.mem_index < self.mem.len) self.mem_index += 1;
 }
 
 pub fn decreasePtr(self: *Self) void {
-    if (self.ptr > 0) self.ptr -= 1;
+    if (self.mem_index > 0) self.mem_index -= 1;
 }
 
 pub fn increaseValue(self: *Self) void {
-    self.src_mem[self.ptr] += 1;
+    self.mem[self.mem_index] += 1;
 }
 
 pub fn decreaseValue(self: *Self) void {
-    if (self.src_mem[self.ptr] > 0)
-        self.src_mem[self.ptr] -= 1;
+    if (self.mem[self.mem_index] > 0)
+        self.mem[self.mem_index] -= 1;
 }
 
-pub fn startLoop(self: *Self) void {
-    if (self.src_mem[self.ptr] == 0) {
-        // jump to matching ']'
+pub fn startLoop(self: *Self) !void {
+    if (self.mem[self.mem_index] == 0) {
+        // jump to matching ']' (end of loop)
     } else {
-        self.loop_start_idx = self.src_idx;
+        try self.loop_stack.append(Loop{ .start_index = self.src_current_index });
     }
 }
 
 pub fn endLoop(self: *Self) void {
-    if (self.loop_start_idx == 0) {
-        std.debug.print("missing loop ] at idx: {d}\n", .{self.src_idx});
+    const last_loop_stack = self.loop_stack.popOrNull() orelse {
+        std.debug.print("found loop ] without matching [ at index {d}\n", .{self.src_current_index});
         std.process.exit(1);
-    }
+    };
 
-    if (self.src_mem[self.ptr] == 0) {
-        self.src_idx += 1;
-    } else {
+    // if current value is 0 it will automatically jump
+    // to next instruction using 'src_next_index'
+    if (self.mem[self.mem_index] != 0) {
         // jump to matching '[' (start of loop)
-        self.src_idx = self.loop_start_idx;
+        self.src_next_index = last_loop_stack.start_index;
     }
 }
