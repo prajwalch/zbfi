@@ -2,7 +2,7 @@ const std = @import("std");
 const Interpreter = @import("Interpreter.zig");
 
 pub fn main() anyerror!void {
-    try interpret(">>>++++[-],");
+    try interpret("++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.");
 }
 
 fn interpret(src: []const u8) !void {
