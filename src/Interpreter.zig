@@ -4,6 +4,10 @@ const std = @import("std");
 const utils = @import("utils.zig");
 
 const MEMORY_SIZE = 30_000;
+const SyntaxError = error{
+    MatchingOpenBracketNotFound,
+    MatchingCloseBracketNotFound,
+};
 
 src: []const u8,
 src_current_index: usize = 0,
@@ -12,6 +16,55 @@ src_next_index: usize = 0,
 mem: [MEMORY_SIZE]u8 = [_]u8{0} ** MEMORY_SIZE,
 mem_index: usize = 0,
 loop_stack: std.ArrayList(usize),
+
+pub fn interpret(allocator: *std.mem.Allocator, src: []const u8) bool {
+    var interpreter = Self.init(allocator, src);
+    defer interpreter.deinit();
+
+    while (interpreter.next_command()) |cmd| {
+        switch (cmd) {
+            '>' => interpreter.increasePtr(),
+            '<' => interpreter.decreasePtr(),
+            '+' => interpreter.increaseValue(),
+            '-' => interpreter.decreaseValue(),
+            '[' => {
+                interpreter.startLoop() catch |err| switch (err) {
+                    error.MatchingCloseBracketNotFound => {
+                        std.debug.print("Syntax Error: matching ']'not found at index '{d}'\n", .{interpreter.src_current_index + 1});
+                        return false;
+                    },
+                    else => {
+                        std.debug.print("Interpreter error: some error occured while creating loop stack\n", .{});
+                        return false;
+                    },
+                };
+            },
+            ']' => {
+                interpreter.endLoop() catch |err| switch (err) {
+                    error.MatchingOpenBracketNotFound => {
+                        std.debug.print("Syntax Error: matching '[' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
+                        return false;
+                    },
+                    else => continue,
+                };
+            },
+            ',' => {
+                interpreter.readChar() catch |_| {
+                    std.debug.print("Interpreter Error: failed to read byte from stdin\n", .{});
+                    return false;
+                };
+            },
+            '.' => {
+                interpreter.writeChar() catch |_| {
+                    std.debug.print("failed to prnt byte on stdin", .{});
+                    return false;
+                };
+            },
+            else => continue,
+        }
+    }
+    return true;
+}
 
 pub fn init(allocator: *std.mem.Allocator, src: []const u8) Self {
     return Self{
@@ -49,8 +102,7 @@ pub fn decreaseValue(self: *Self) void {
 
 pub fn startLoop(self: *Self) !void {
     const loop_end_index = self.findEndOfLoop() orelse {
-        std.debug.print("syntax error: found unmatched ']' of index {d}\n ", .{self.src_current_index});
-        std.process.exit(1);
+        return SyntaxError.MatchingCloseBracketNotFound;
     };
 
     if (self.mem[self.mem_index] == 0) {
@@ -61,10 +113,9 @@ pub fn startLoop(self: *Self) !void {
     }
 }
 
-pub fn endLoop(self: *Self) void {
+pub fn endLoop(self: *Self) !void {
     const loop_start_index = self.loop_stack.popOrNull() orelse {
-        std.debug.print("syntax error: found unmatched '[' of index {d}\n", .{self.src_current_index});
-        std.process.exit(1);
+        return SyntaxError.MatchingOpenBracketNotFound;
     };
 
     // Here no need to check wether current value is zero or not
