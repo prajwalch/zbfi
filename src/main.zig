@@ -11,8 +11,8 @@ fn interpret(src: []const u8) !void {
     var interpreter = Interpreter.init(allocator, src);
     errdefer interpreter.deinit();
 
-    while (interpreter.next()) |operator| {
-        switch (operator) {
+    while (interpreter.next_command()) |cmd| {
+        switch (cmd) {
             '>' => interpreter.increasePtr(),
             '<' => interpreter.decreasePtr(),
             '+' => interpreter.increaseValue(),
