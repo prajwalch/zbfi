@@ -1,9 +1,7 @@
-const std = @import("std");
 const Self = @This();
 
-const allocator = std.heap.page_allocator;
-const stdin = std.io.getStdIn().reader();
-const stdout = std.io.getStdOut().writer();
+const std = @import("std");
+const utils = @import("utils.zig");
 
 const MEMORY_SIZE = 30_000;
 
@@ -13,10 +11,13 @@ src_next_index: usize = 0,
 
 mem: [MEMORY_SIZE]u8 = [_]u8{0} ** MEMORY_SIZE,
 mem_index: usize = 0,
-loop_stack: std.ArrayList(usize) = std.ArrayList(usize).init(allocator),
+loop_stack: std.ArrayList(usize),
 
-pub fn init(src: []const u8) Self {
-    return Self{ .src = src };
+pub fn init(allocator: *std.mem.Allocator, src: []const u8) Self {
+    return Self{
+        .src = src,
+        .loop_stack = std.ArrayList(usize).init(allocator),
+    };
 }
 
 pub fn deinit(self: Self) void {
@@ -75,13 +76,13 @@ pub fn endLoop(self: *Self) void {
 }
 
 pub fn readChar(self: *Self) !void {
-    var char = try stdin.readByte();
-    try stdin.skipUntilDelimiterOrEof('\n');
+    var char = try utils.stdin.readByte();
+    try utils.stdin.skipUntilDelimiterOrEof('\n');
     self.mem[self.mem_index] = char;
 }
 
 pub fn writeChar(self: *Self) !void {
-    try stdout.writeByte(self.mem[self.mem_index]);
+    try utils.stdout.writeByte(self.mem[self.mem_index]);
 }
 
 fn findEndOfLoop(self: *Self) ?usize {
