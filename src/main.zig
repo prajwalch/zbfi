@@ -19,9 +19,7 @@ fn interpret(src: []const u8) !void {
             ']' => interpreter.endLoop(),
             ',' => try interpreter.readChar(),
             '.' => try interpreter.writeChar(),
-            else => {
-                std.debug.print("Unknown indentifier\n", .{});
-            },
+            else => continue,
         }
     }
 }
