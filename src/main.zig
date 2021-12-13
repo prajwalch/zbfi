@@ -6,7 +6,7 @@ pub fn main() anyerror!void {
 }
 
 fn interpret(src: []const u8) !void {
-    var interpreter = Interpreter.init(src);
+    var interpreter = Interpreter.init(std.heap.page_allocator, src);
     errdefer interpreter.deinit();
 
     while (interpreter.next()) |operator| {
