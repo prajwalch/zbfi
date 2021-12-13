@@ -39,12 +39,11 @@ pub fn decreasePtr(self: *Self) void {
 }
 
 pub fn increaseValue(self: *Self) void {
-    self.mem[self.mem_index] += 1;
+    self.mem[self.mem_index] +%= 1;
 }
 
 pub fn decreaseValue(self: *Self) void {
-    if (self.mem[self.mem_index] > 0)
-        self.mem[self.mem_index] -= 1;
+    self.mem[self.mem_index] -%= 1;
 }
 
 pub fn startLoop(self: *Self) !void {
