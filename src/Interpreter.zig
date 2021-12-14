@@ -78,8 +78,9 @@ pub fn deinit(self: Self) void {
 }
 
 pub fn next_command(self: *Self) ?u8 {
+    if (self.src_next_index >= self.src.len) return null;
+
     self.src_current_index = self.src_next_index;
-    if (self.src_current_index >= self.src.len) return null;
     self.src_next_index += 1;
     return self.src[self.src_current_index];
 }
