@@ -151,7 +151,7 @@ fn findEndOfLoop(self: *Self) ?usize {
 
         if (nums_open_bracket > 0) {
             if (nums_open_bracket == nums_close_bracket) {
-                return self.src_current_index - 1;
+                return self.src_current_index + i;
             }
         }
     }
