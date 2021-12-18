@@ -21,7 +21,7 @@ pub fn interpret(allocator: *std.mem.Allocator, src: []const u8) bool {
     var interpreter = Self.init(allocator, src);
     defer interpreter.deinit();
 
-    while (interpreter.next_command()) |cmd| {
+    while (interpreter.nextCommand()) |cmd| {
         switch (cmd) {
             '>' => interpreter.increasePtr(),
             '<' => interpreter.decreasePtr(),
@@ -77,7 +77,7 @@ pub fn deinit(self: Self) void {
     self.loop_stack.deinit();
 }
 
-pub fn next_command(self: *Self) ?u8 {
+pub fn nextCommand(self: *Self) ?u8 {
     if (self.src_next_index >= self.src.len) return null;
 
     self.src_current_index = self.src_next_index;
