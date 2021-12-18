@@ -11,4 +11,5 @@ All the install instructions are there, so download and install it according to 
 
 1. Clone it with `git clone --recursive https://github.com/PrajwalCH/zbfi`
 2. Change directory to zbfi
-3. Run `zig build -Drelease-safe=true run` to build and run
+3. Run `zig build -Drelease-safe=true` to build it.
+4. Run `./zig-out/bin/zbfi` for interactive mode or `./zig-out/bin -f <file-name>` to run source code
