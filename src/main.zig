@@ -3,7 +3,7 @@ const Interpreter = @import("Interpreter.zig");
 const utils = @import("utils.zig");
 const args = @import("args.zig");
 
-const allocator = std.heap.page_allocator;
+const pga = std.heap.page_allocator;
 
 pub fn main() anyerror!void {
     const zbfi_args = args.parse() catch |err| switch (err) {
@@ -17,10 +17,26 @@ pub fn main() anyerror!void {
     if (zbfi_args.is_help) {
         return;
     }
-    try runInteractiveMode();
+
+    if (zbfi_args.src_file) |file_name| {
+        var src = readSrcFile(pga, file_name) catch |err| switch (err) {
+            error.InvalidFileFormat => {
+                std.debug.print("Error: Invalid file format\n", .{});
+                std.process.exit(1);
+            },
+            error.FileNotFound => {
+                std.debug.print("Error: Src file not found\n", .{});
+                std.process.exit(1);
+            },
+            else => |e| return e,
+        };
+        _ = Interpreter.interpret(pga, src);
+        return;
+    }
+    try runInteractiveMode(pga);
 }
 
-fn readSrcFile(file_path: []const u8) ![]u8 {
+fn readSrcFile(allocator: *std.mem.Allocator, file_path: []const u8) ![]u8 {
     if (!isValidExtension(file_path))
         return error.InvalidFileFormat;
 
@@ -37,7 +53,7 @@ fn isValidExtension(file_path: []const u8) bool {
     return true;
 }
 
-fn runInteractiveMode() !void {
+fn runInteractiveMode(allocator: *std.mem.Allocator) !void {
     while (true) {
         std.debug.print("> ", .{});
 
