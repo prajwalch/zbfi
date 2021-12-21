@@ -8,7 +8,7 @@ const pga = std.heap.page_allocator;
 pub fn main() anyerror!void {
     const zbfi_args = args.parse() catch |err| switch (err) {
         error.MissingValue => {
-            std.debug.warn("Error: Missing value\n", .{});
+            std.debug.print("Error: Missing value\n", .{});
             return;
         },
         else => |e| return e,
@@ -36,7 +36,7 @@ pub fn main() anyerror!void {
     try runInteractiveMode(pga);
 }
 
-fn readSrcFile(allocator: *std.mem.Allocator, file_path: []const u8) ![]u8 {
+fn readSrcFile(allocator: std.mem.Allocator, file_path: []const u8) ![]u8 {
     if (!isValidExtension(file_path))
         return error.InvalidFileFormat;
 
@@ -53,7 +53,7 @@ fn isValidExtension(file_path: []const u8) bool {
     return true;
 }
 
-fn runInteractiveMode(allocator: *std.mem.Allocator) !void {
+fn runInteractiveMode(allocator: std.mem.Allocator) !void {
     while (true) {
         std.debug.print("> ", .{});
 

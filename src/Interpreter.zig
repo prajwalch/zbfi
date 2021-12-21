@@ -17,7 +17,7 @@ mem: [MEMORY_SIZE]u8 = [_]u8{0} ** MEMORY_SIZE,
 mem_index: usize = 0,
 loop_stack: std.ArrayList(usize),
 
-pub fn interpret(allocator: *std.mem.Allocator, src: []const u8) bool {
+pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
     var interpreter = Self.init(allocator, src);
     defer interpreter.deinit();
 
@@ -49,13 +49,13 @@ pub fn interpret(allocator: *std.mem.Allocator, src: []const u8) bool {
                 };
             },
             ',' => {
-                interpreter.readChar() catch |_| {
+                interpreter.readChar() catch {
                     std.debug.print("Interpreter Error: failed to read byte from stdin\n", .{});
                     return false;
                 };
             },
             '.' => {
-                interpreter.writeChar() catch |_| {
+                interpreter.writeChar() catch {
                     std.debug.print("failed to prnt byte on stdin", .{});
                     return false;
                 };
@@ -66,7 +66,7 @@ pub fn interpret(allocator: *std.mem.Allocator, src: []const u8) bool {
     return true;
 }
 
-pub fn init(allocator: *std.mem.Allocator, src: []const u8) Self {
+pub fn init(allocator: std.mem.Allocator, src: []const u8) Self {
     return Self{
         .src = src,
         .loop_stack = std.ArrayList(usize).init(allocator),
