@@ -4,7 +4,7 @@ It is written only to learn zig for myself but you can experiment
 with the code however you like.
 
 ## Building
-To build the project you only need to have a [zig compiler - v0.8.1](https://ziglang.org/download).
+To build the project you only need to have a [zig compiler - v0.9.0](https://ziglang.org/download)
 All the install instructions are there, so download and install it according to the instructions then follow the below steps.
 
 1. Clone it with `git clone --recursive https://github.com/PrajwalCH/zbfi`
