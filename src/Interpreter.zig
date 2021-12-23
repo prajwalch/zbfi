@@ -30,7 +30,7 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
             '[' => {
                 interpreter.startLoop() catch |err| switch (err) {
                     error.MatchingCloseBracketNotFound => {
-                        std.debug.print("Syntax Error: matching ']'not found at index '{d}'\n", .{interpreter.src_current_index + 1});
+                        std.debug.print("Syntax Error: matching ']' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
                         return false;
                     },
                     else => {
@@ -49,14 +49,14 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
                 };
             },
             ',' => {
-                interpreter.readChar() catch {
-                    std.debug.print("Interpreter Error: failed to read byte from stdin\n", .{});
+                interpreter.readChar() catch |e| {
+                    std.debug.print("Error: failed to read byte from stdin {s}\n", .{e});
                     return false;
                 };
             },
             '.' => {
-                interpreter.writeChar() catch {
-                    std.debug.print("failed to prnt byte on stdin", .{});
+                interpreter.writeChar() catch |e| {
+                    std.debug.print("Error: failed to prnt byte on stdin {s}\n", .{e});
                     return false;
                 };
             },
