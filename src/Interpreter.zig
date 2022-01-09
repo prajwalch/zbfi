@@ -1,4 +1,4 @@
-const Self = @This();
+const Interpreter = @This();
 
 const std = @import("std");
 const utils = @import("utils.zig");
@@ -18,7 +18,7 @@ mem_index: usize = 0,
 loop_stack: std.ArrayList(usize),
 
 pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
-    var interpreter = Self.init(allocator, src);
+    var interpreter = Interpreter.init(allocator, src);
     defer interpreter.deinit();
 
     while (interpreter.nextCommand()) |cmd| {
@@ -66,18 +66,18 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
     return true;
 }
 
-pub fn init(allocator: std.mem.Allocator, src: []const u8) Self {
-    return Self{
+pub fn init(allocator: std.mem.Allocator, src: []const u8) Interpreter {
+    return Interpreter{
         .src = src,
         .loop_stack = std.ArrayList(usize).init(allocator),
     };
 }
 
-pub fn deinit(self: Self) void {
+pub fn deinit(self: Interpreter) void {
     self.loop_stack.deinit();
 }
 
-pub fn nextCommand(self: *Self) ?u8 {
+pub fn nextCommand(self: *Interpreter) ?u8 {
     if (self.src_next_index >= self.src.len) return null;
 
     self.src_current_index = self.src_next_index;
@@ -85,23 +85,23 @@ pub fn nextCommand(self: *Self) ?u8 {
     return self.src[self.src_current_index];
 }
 
-pub fn increasePtr(self: *Self) void {
+pub fn increasePtr(self: *Interpreter) void {
     if (self.mem_index < self.mem.len) self.mem_index += 1;
 }
 
-pub fn decreasePtr(self: *Self) void {
+pub fn decreasePtr(self: *Interpreter) void {
     if (self.mem_index > 0) self.mem_index -= 1;
 }
 
-pub fn increaseValue(self: *Self) void {
+pub fn increaseValue(self: *Interpreter) void {
     self.mem[self.mem_index] +%= 1;
 }
 
-pub fn decreaseValue(self: *Self) void {
+pub fn decreaseValue(self: *Interpreter) void {
     self.mem[self.mem_index] -%= 1;
 }
 
-pub fn startLoop(self: *Self) !void {
+pub fn startLoop(self: *Interpreter) !void {
     const loop_end_index = self.findEndOfLoop() orelse {
         return SyntaxError.MatchingCloseBracketNotFound;
     };
@@ -114,7 +114,7 @@ pub fn startLoop(self: *Self) !void {
     }
 }
 
-pub fn endLoop(self: *Self) !void {
+pub fn endLoop(self: *Interpreter) !void {
     const loop_start_index = self.loop_stack.popOrNull() orelse {
         return SyntaxError.MatchingOpenBracketNotFound;
     };
@@ -127,17 +127,17 @@ pub fn endLoop(self: *Self) !void {
     }
 }
 
-pub fn readChar(self: *Self) !void {
+pub fn readChar(self: *Interpreter) !void {
     var char = try utils.stdin.readByte();
     try utils.stdin.skipUntilDelimiterOrEof('\n');
     self.mem[self.mem_index] = char;
 }
 
-pub fn writeChar(self: *Self) !void {
+pub fn writeChar(self: *Interpreter) !void {
     try utils.stdout.writeByte(self.mem[self.mem_index]);
 }
 
-fn findEndOfLoop(self: *Self) ?usize {
+fn findEndOfLoop(self: *Interpreter) ?usize {
     var nums_open_bracket: usize = 0;
     var nums_close_bracket: usize = 0;
 
