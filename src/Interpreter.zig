@@ -27,38 +27,30 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
             '<' => interpreter.decreasePtr(),
             '+' => interpreter.increaseValue(),
             '-' => interpreter.decreaseValue(),
-            '[' => {
-                interpreter.startLoop() catch |err| switch (err) {
-                    error.CloseBracketNotFound => {
-                        std.debug.print("Syntax Error: matching ']' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
-                        return false;
-                    },
-                    else => {
-                        std.debug.print("Interpreter error: some error occured while creating loop stack\n", .{});
-                        return false;
-                    },
-                };
-            },
-            ']' => {
-                interpreter.endLoop() catch |err| switch (err) {
-                    error.OpenBracketNotFound => {
-                        std.debug.print("Syntax Error: matching '[' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
-                        return false;
-                    },
-                    else => continue,
-                };
-            },
-            ',' => {
-                interpreter.readChar() catch |e| {
-                    std.debug.print("Error: failed to read byte from stdin {s}\n", .{e});
+            '[' => interpreter.startLoop() catch |err| switch (err) {
+                error.CloseBracketNotFound => {
+                    std.debug.print("Syntax Error: matching ']' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
                     return false;
-                };
-            },
-            '.' => {
-                interpreter.writeChar() catch |e| {
-                    std.debug.print("Error: failed to prnt byte on stdin {s}\n", .{e});
+                },
+                else => {
+                    std.debug.print("Interpreter error: some error occured while creating loop stack\n", .{});
                     return false;
-                };
+                },
+            },
+            ']' => interpreter.endLoop() catch |err| switch (err) {
+                error.OpenBracketNotFound => {
+                    std.debug.print("Syntax Error: matching '[' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
+                    return false;
+                },
+                else => continue,
+            },
+            ',' => interpreter.readChar() catch |e| {
+                std.debug.print("Error: failed to read byte from stdin {s}\n", .{e});
+                return false;
+            },
+            '.' => interpreter.writeChar() catch |e| {
+                std.debug.print("Error: failed to prnt byte on stdin {s}\n", .{e});
+                return false;
             },
             else => continue,
         }
