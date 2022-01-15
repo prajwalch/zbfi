@@ -5,8 +5,8 @@ const utils = @import("utils.zig");
 
 const MEMORY_SIZE = 30_000;
 const SyntaxError = error{
-    MatchingOpenBracketNotFound,
-    MatchingCloseBracketNotFound,
+    OpenBracketNotFound,
+    CloseBracketNotFound,
 };
 
 src: []const u8,
@@ -29,7 +29,7 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
             '-' => interpreter.decreaseValue(),
             '[' => {
                 interpreter.startLoop() catch |err| switch (err) {
-                    error.MatchingCloseBracketNotFound => {
+                    error.CloseBracketNotFound => {
                         std.debug.print("Syntax Error: matching ']' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
                         return false;
                     },
@@ -41,7 +41,7 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
             },
             ']' => {
                 interpreter.endLoop() catch |err| switch (err) {
-                    error.MatchingOpenBracketNotFound => {
+                    error.OpenBracketNotFound => {
                         std.debug.print("Syntax Error: matching '[' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
                         return false;
                     },
@@ -103,7 +103,7 @@ pub fn decreaseValue(self: *Interpreter) void {
 
 pub fn startLoop(self: *Interpreter) !void {
     const loop_end_index = self.findEndOfLoop() orelse {
-        return SyntaxError.MatchingCloseBracketNotFound;
+        return SyntaxError.CloseBracketNotFound;
     };
 
     if (self.mem[self.mem_index] == 0) {
@@ -116,7 +116,7 @@ pub fn startLoop(self: *Interpreter) !void {
 
 pub fn endLoop(self: *Interpreter) !void {
     const loop_start_index = self.loop_stack.popOrNull() orelse {
-        return SyntaxError.MatchingOpenBracketNotFound;
+        return SyntaxError.OpenBracketNotFound;
     };
 
     // Here no need to check wether current value is zero or not
