@@ -33,7 +33,7 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
                     return false;
                 },
                 else => {
-                    std.debug.print("Interpreter error: some error occured while creating loop stack\n{s}\n", .{err});
+                    std.debug.print("Interpreter Error: some error occured while creating loop stack\n{s}\n", .{err});
                     return false;
                 },
             },
@@ -45,11 +45,11 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
                 else => continue,
             },
             ',' => interpreter.readChar() catch |err| {
-                std.debug.print("Error: failed to read byte from stdin\n{s}\n", .{err});
+                std.debug.print("Interpreter Error: failed to read byte from stdin\n{s}\n", .{err});
                 return false;
             },
             '.' => interpreter.writeChar() catch |err| {
-                std.debug.print("Error: failed to prnt byte on stdin\n{s}\n", .{err});
+                std.debug.print("Interpreter Error: failed to prnt byte on stdin\n{s}\n", .{err});
                 return false;
             },
             else => continue,
