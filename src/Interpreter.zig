@@ -42,6 +42,7 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
                     std.debug.print("Syntax Error: matching '[' not found at index '{d}'\n", .{interpreter.src_current_index + 1});
                     return false;
                 },
+                // endLoop only returns OpenBracketNotFound error so it's safe to continue loop
                 else => continue,
             },
             ',' => interpreter.readChar() catch |err| {
