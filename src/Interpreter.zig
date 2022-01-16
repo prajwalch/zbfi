@@ -33,7 +33,7 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
                     return false;
                 },
                 else => {
-                    std.debug.print("Interpreter error: some error occured while creating loop stack\n", .{});
+                    std.debug.print("Interpreter error: some error occured while creating loop stack\n{s}\n", .{err});
                     return false;
                 },
             },
@@ -44,12 +44,12 @@ pub fn interpret(allocator: std.mem.Allocator, src: []const u8) bool {
                 },
                 else => continue,
             },
-            ',' => interpreter.readChar() catch |e| {
-                std.debug.print("Error: failed to read byte from stdin {s}\n", .{e});
+            ',' => interpreter.readChar() catch |err| {
+                std.debug.print("Error: failed to read byte from stdin\n{s}\n", .{err});
                 return false;
             },
-            '.' => interpreter.writeChar() catch |e| {
-                std.debug.print("Error: failed to prnt byte on stdin {s}\n", .{e});
+            '.' => interpreter.writeChar() catch |err| {
+                std.debug.print("Error: failed to prnt byte on stdin\n{s}\n", .{err});
                 return false;
             },
             else => continue,
@@ -106,7 +106,7 @@ pub fn startLoop(self: *Interpreter) !void {
     }
 }
 
-pub fn endLoop(self: *Interpreter) !void {
+pub fn endLoop(self: *Interpreter) SyntaxError!void {
     const loop_start_index = self.loop_stack.popOrNull() orelse {
         return SyntaxError.OpenBracketNotFound;
     };
