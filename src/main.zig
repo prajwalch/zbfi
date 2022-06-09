@@ -1,24 +1,25 @@
 const std = @import("std");
 const Interpreter = @import("Interpreter.zig");
 const utils = @import("utils.zig");
-const args = @import("args.zig");
+const zig_arg = @import("zig-arg");
 
 const pga = std.heap.page_allocator;
+const flag = zig_arg.flag;
+const Command = zig_arg.Command;
 
 pub fn main() anyerror!void {
-    const zbfi_args = args.parse() catch |err| switch (err) {
-        error.MissingValue => {
-            std.debug.print("Error: Missing value\n", .{});
-            return;
-        },
-        else => |e| return e,
-    };
+    var zbfi = try initCliArgs(pga);
+    defer zbfi.deinit();
 
-    if (zbfi_args.is_help) {
+    var args = try zbfi.parseProcess();
+    defer args.deinit();
+
+    if (args.isPresent("help")) {
+        std.log.info("Show help\n", .{});
         return;
     }
 
-    if (zbfi_args.src_file) |file_name| {
+    if (args.valueOf("file")) |file_name| {
         var src = readSrcFile(pga, file_name) catch |err| switch (err) {
             error.InvalidFileFormat => {
                 std.debug.print("Error: Invalid file format\n", .{});
@@ -33,7 +34,16 @@ pub fn main() anyerror!void {
         _ = Interpreter.interpret(pga, src);
         return;
     }
+
     try runInteractiveMode(pga);
+}
+
+fn initCliArgs(allocator: std.mem.Allocator) !Command {
+    var zbfi = Command.new(allocator, "zbfi");
+    try zbfi.addArg(flag.boolean("help", 'h'));
+    try zbfi.addArg(flag.argOne("file", 'f'));
+
+    return zbfi;
 }
 
 fn readSrcFile(allocator: std.mem.Allocator, file_path: []const u8) ![]u8 {
