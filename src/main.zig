@@ -7,6 +7,16 @@ const pga = std.heap.page_allocator;
 const flag = zig_arg.flag;
 const Command = zig_arg.Command;
 
+const usage =
+    \\ Usage: zbfi [option]
+    \\ 
+    \\ Option:
+    \\  --file, -f <NAME>       Interpret from file
+    \\  --help, -h              Show this help
+    \\
+    \\  To run REPL mode run without any option
+;
+
 pub fn main() anyerror!void {
     var zbfi = try initCliArgs(pga);
     defer zbfi.deinit();
@@ -15,7 +25,7 @@ pub fn main() anyerror!void {
     defer args.deinit();
 
     if (args.isPresent("help")) {
-        std.log.info("Show help\n", .{});
+        std.debug.print("{s}\n", .{usage});
         return;
     }
 
