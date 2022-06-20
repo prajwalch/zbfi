@@ -74,6 +74,18 @@ fn isValidExtension(file_path: []const u8) bool {
 }
 
 fn runInteractiveMode(allocator: std.mem.Allocator) !void {
+    std.debug.print(
+        \\ ███████╗██████╗░███████╗██╗
+        \\ ╚════██║██╔══██╗██╔════╝██║
+        \\ ░░███╔═╝██████╦╝█████╗░░██║
+        \\ ██╔══╝░░██╔══██╗██╔══╝░░██║
+        \\ ███████╗██████╦╝██║░░░░░██║
+        \\ ╚══════╝╚═════╝░╚═╝░░░░░╚═╝
+        \\
+        \\ Welcome to Zbfi REPL mode
+        \\ Run ;quit to close REPL mode
+        \\
+    , .{});
     while (true) {
         std.debug.print("> ", .{});
 
