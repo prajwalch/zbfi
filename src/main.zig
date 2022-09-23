@@ -1,33 +1,18 @@
 const std = @import("std");
 const Interpreter = @import("Interpreter.zig");
 const utils = @import("utils.zig");
-const zig_arg = @import("zig-arg");
+const yazap = @import("yazap");
 
 const pga = std.heap.page_allocator;
-const flag = zig_arg.flag;
-const Command = zig_arg.Command;
-
-const usage =
-    \\ Usage: zbfi [option]
-    \\ 
-    \\ Option:
-    \\  --file, -f <NAME>       Interpret from file
-    \\  --help, -h              Show this help
-    \\
-    \\  To run REPL mode run without any option
-;
+const flag = yazap.flag;
+const Command = yazap.Command;
+const Yazap = yazap.Yazap;
 
 pub fn main() anyerror!void {
     var zbfi = try initCliArgs(pga);
     defer zbfi.deinit();
 
     var args = try zbfi.parseProcess();
-    defer args.deinit();
-
-    if (args.isPresent("help")) {
-        std.debug.print("{s}\n", .{usage});
-        return;
-    }
 
     if (args.valueOf("file")) |file_name| {
         var src = readSrcFile(pga, file_name) catch |err| switch (err) {
@@ -48,12 +33,12 @@ pub fn main() anyerror!void {
     try runInteractiveMode(pga);
 }
 
-fn initCliArgs(allocator: std.mem.Allocator) !Command {
-    var zbfi = Command.new(allocator, "zbfi");
-    try zbfi.addArg(flag.boolean("help", 'h'));
-    try zbfi.addArg(flag.argOne("file", 'f'));
+fn initCliArgs(allocator: std.mem.Allocator) !Yazap {
+    var app = Yazap.init(allocator, "zbfi", "BrainFuck Interpreter written in zig");
+    errdefer app.deinit();
 
-    return zbfi;
+    try app.rootCommand().addArg(flag.argOne("file", 'f', "Source file to interpret"));
+    return app;
 }
 
 fn readSrcFile(allocator: std.mem.Allocator, file_path: []const u8) ![]u8 {
